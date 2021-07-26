@@ -30,17 +30,22 @@ function! s:show_documentation()
   endif
 endfunction
 
+" coc tab deal with popup
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
 
 " Basic comfig
 filetype plugin indent on
 set cursorline
 set wildmenu
-
 set number 
 set relativenumber
 set linebreak
 set completeopt=menu,popup
 set laststatus=2
+set lazyredraw
 
 set tabstop=4
 set shiftwidth=4
@@ -68,7 +73,7 @@ noremap ]q :cn<CR>
 syntax on
 highlight SignColumn cterm=none ctermbg=none
 highlight Search cterm=none ctermfg=Black
-highlight Visual cterm=none ctermbg=Gray ctermfg=Black
+highlight Visual cterm=none ctermbg=Yellow ctermfg=Black
 highlight Pmenu ctermfg=Black ctermbg=187
 highlight PmenuSel ctermfg=White ctermbg=Black
 
@@ -161,9 +166,16 @@ inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float
 inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
 vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
 vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+highlight CocWarningSign ctermfg=green
 highlight CocInfoSign ctermfg=cyan
-highlight CocWarningSign ctermfg=black
 highlight CocErrorSign ctermfg=red
+inoremap <silent> <C-j> <C-o>:call coc#float#close_all()<CR>
+nnoremap <silent> <space>j :call coc#float#close_all()<CR>
 
 " nerdcomment
 let g:NERDDefaultNesting=0
