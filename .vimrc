@@ -73,7 +73,7 @@ noremap ]q :cn<CR>
 syntax on
 highlight SignColumn cterm=none ctermbg=none
 highlight Search cterm=none ctermfg=Black
-highlight Visual cterm=none ctermbg=Yellow ctermfg=Black
+highlight Visual cterm=none ctermbg=LightMagenta ctermfg=Black
 highlight Pmenu ctermfg=Black ctermbg=187
 highlight PmenuSel ctermfg=White ctermbg=Black
 
@@ -127,20 +127,11 @@ xnoremap <silent> id :<C-U>normal! T/vt/<CR>
 xnoremap <silent> ad :<C-U>normal! F/vf/<CR>
 
 " vista
-autocmd filetype c let g:vista_default_executive="ale"
-autocmd filetype cpp let g:vista_default_executive="ale"
+autocmd filetype c let g:vista_default_executive="coc"
+autocmd filetype cpp let g:vista_default_executive="coc"
+autocmd filetype python let g:vista_default_executive="coc"
+autocmd filetype javascript let g:vista_default_executive="coc"
 nnoremap <silent> <Leader>u :Vista!!<CR>
-
-" ale
-"let g:ale_set_highlights=0
-"let g:ale_warn_about_trailing_blank_lines=0
-"let g:ale_warn_about_trailing_whitespace=0
-"let g:ale_sign_error='!'
-"let g:ale_sign_warning='*'
-"nnoremap <silent> <Leader>j :ALENext -wrap -error<CR>
-"nnoremap <silent> <Leader><S-j> :ALEPrevious -wrap -error<CR>
-"highlight ALEWarningSign cterm=none ctermbg=none ctermfg=Yellow
-"highlight ALEErrorSign cterm=none ctermbg=none ctermfg=Red
 
 " coc
 set signcolumn=yes
@@ -187,8 +178,11 @@ nmap <silent> + <Space>cA
 highlight QuickScopePrimary cterm=none ctermfg=DarkBlue
 highlight QuickScopeSecondary cterm=none ctermfg=Red
 
-" sneak
-let g:sneak#label=1
+" easy motion
+let g:EasyMotion_do_mapping=0
+let g:EasyMotion_smartcase=1
+nmap s <Plug>(easymotion-s2)
+nmap S <Plug>(easymotion-overwin-f2)
 
 " buftabline
 let g:buftabline_show=1
@@ -244,27 +238,3 @@ let g:HowMuch_auto_engines = ['py', 'vim', 'bc']
 
 " rainbow
 let g:rainbow_active = 1
-
-"for ycm enable
-"function SetYcmPython() abort
-    "nnoremap <buffer> <Leader>dd :YcmComple GoTo<CR>
-    "nnoremap <buffer> <Leader>gt :YcmComple GetType<CR>
-    "nnoremap <buffer> <Leader>kk :YcmComple GetDoc<CR>
-    "nnoremap <buffer> <Leader>rr :YcmComple RefactorRename 
-"endfunction
-"function SetYcmC() abort
-    "nnoremap <buffer> <Leader>di :YcmComple GoToInclude<CR>
-    "nnoremap <buffer> <Leader>dc :YcmComple GoToDeclaration<CR>
-    "nnoremap <buffer> <Leader>df :YcmComple GoToDefinition<CR>
-    "nnoremap <buffer> <Leader>gt :YcmComple GetType<CR>
-    "nnoremap <buffer> <Leader>kk :YcmComple GetDoc<CR>
-    "nnoremap <buffer> <Leader>rr :YcmComple RefactorRename 
-"endfunction
-"let g:ycm_key_invoke_completion = '<Leader><Tab>'
-"let g:ycm_use_ultisnips_completer=0
-"let g:ycm_show_diagnostics_ui=0
-"let g:ycm_auto_hover=''
-"autocmd filetype python call SetYcmPython()
-"autocmd filetype cpp call SetYcmC()
-"autocmd filetype c call SetYcmC()
-"autocmd filetype cuda call SetYcmC()
