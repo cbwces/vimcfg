@@ -28,6 +28,23 @@ function! GrepAll2Quickfix() abort
     silent call matchadd('Search', l:cword)
 endfunction
 
+function! s:MakeDiff(...) abort
+    let l:ft = &filetype
+    new
+    execute "edit diff1"
+    only
+    silent! execute "0put " . a:1
+    let l:n = 1
+    for diff_reg in a:000[1:]
+        let l:n += 1
+        vnew
+        execute "edit diff" . l:n
+        silent! execute "0put " . diff_reg
+    endfor
+    windo diffthis
+    execute "windo setlocal filetype=" . l:ft
+endfunction
+
 " Let cursor faster return to normal window from netrw
 function! NetrwMapping() abort
     noremap <buffer> <c-l> <c-w><c-l>
@@ -61,8 +78,8 @@ set shiftround
 set expandtab
 set autoindent
 set smartindent
-set timeoutlen=2000
-set ttimeoutlen=100
+set timeoutlen=1500
+set ttimeoutlen=50
 set noautoread
 
 set noshowmode "no show status of mode
@@ -132,11 +149,15 @@ if has('nvim')
     tnoremap <C-L> <C-\><C-N><C-W>l
     tnoremap <C-H> <C-\><C-N><C-W>h
     tnoremap <C-D> <C-\><C-N><C-W>c
+    nnoremap <silent> <Leader>t :split<bar>resize 15<bar>terminal<CR>:setlocal nonumber norelativenumber nocursorline nocursorcolumn<CR>i
+    nnoremap <silent> <Leader>vt :vertical split<bar>terminal<CR>:setlocal nonumber norelativenumber nocursorline nocursorcolumn<CR>i
 else
     tnoremap <C-J> <C-W>j
     tnoremap <C-K> <C-W>k
     tnoremap <C-L> <C-W>l
     tnoremap <C-H> <C-W>h
+    nnoremap <silent> <Leader>t :below terminal ++rows=15<CR>
+    nnoremap <silent> <Leader>vt :vertical terminal<CR>
 endif
 
 nnoremap <silent> <Leader>1 :b1<CR>
@@ -158,14 +179,7 @@ inoremap <C-H> <C-O>^
 inoremap <C-L> <C-O>$
 nnoremap <Leader>gr :call Grep2Quickfix()<CR>
 nnoremap <Leader>G :call GrepAll2Quickfix()<CR>
-
-if has('nvim')
-    nnoremap <silent> <Leader>t :split<bar>resize 15<bar>terminal<CR>:set nonumber norelativenumber nocursorline nocursorcolumn<CR>i
-    nnoremap <silent> <Leader>vt :vertical split<bar>terminal<CR>:set nonumber norelativenumber nocursorline nocursorcolumn<CR>i
-else
-    nnoremap <silent> <Leader>t :below terminal ++rows=15<CR>
-    nnoremap <silent> <Leader>vt :vertical terminal<CR>
-endif
+command -nargs=+ Mkdiff :call s:MakeDiff(<f-args>)
 
 augroup netrw
     autocmd!

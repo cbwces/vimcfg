@@ -30,7 +30,8 @@
         "venv",
         ".git"
     ],
-    "diagnostic.warningSign": "*",
+    "diagnostic.infoSign": "",
+    "diagnostic.warningSign": "",
     "diagnostic.errorSign": "!",
     "diagnostic-languageserver.filetypes": {
         "vim": "vint",

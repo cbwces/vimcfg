@@ -47,6 +47,8 @@ function! s:get_visual_selection() abort range
     return join(l:lines, "\n")
 endfunction
 
+let g:python3_host_prog='/usr/bin/python'
+
 " vista
 let g:vista_executive_for = {
             \ 'cpp': 'coc',
@@ -55,36 +57,6 @@ let g:vista_executive_for = {
             \ 'javascript': 'coc'
             \}
 nnoremap <silent> <Space>u :Vista!!<CR>
-
-" coc
-set signcolumn=yes
-nmap <silent> [g <Plug>(coc-diagnostic-prev-error)
-nmap <silent> ]g <Plug>(coc-diagnostic-next-error)
-nmap <silent> <space>dd <Plug>(coc-definition)
-nmap <silent> <space>dt <Plug>(coc-type-definition)
-nmap <silent> <space>di <Plug>(coc-implementation)
-nmap <silent> <space>dr <Plug>(coc-references)
-nnoremap <silent> <space>k :call <SID>show_documentation()<CR>
-nmap <space>rn <Plug>(coc-rename)
-xmap if <Plug>(coc-funcobj-i)
-omap if <Plug>(coc-funcobj-i)
-xmap af <Plug>(coc-funcobj-a)
-omap af <Plug>(coc-funcobj-a)
-xmap ic <Plug>(coc-classobj-i)
-omap ic <Plug>(coc-classobj-i)
-xmap ac <Plug>(coc-classobj-a)
-omap ac <Plug>(coc-classobj-a)
-inoremap <silent><expr> <TAB>
-      \ coc#pum#visible() ? coc#pum#next(1) :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
-highlight CocWarningSign ctermfg=green
-highlight CocInfoSign ctermfg=cyan
-highlight CocErrorSign ctermfg=red
-highlight CocMenuSel ctermfg=white ctermbg=239
-inoremap <silent> <C-j> <C-o>:call coc#float#close_all()<CR>
-nnoremap <silent> <space>j :call coc#float#close_all()<CR>
 
 " nerdcomment
 let g:NERDDefaultNesting=0
@@ -117,11 +89,42 @@ highlight GitGutterAdd cterm=none ctermfg=Blue ctermbg=none
 highlight GitGutterChange cterm=none ctermfg=Blue ctermbg=none
 highlight GitGutterDelete cterm=none ctermfg=Blue ctermbg=none
 
+" coc
+set signcolumn=yes
+nmap <silnt> [g <Plug>(coc-diagnostic-prev-error)
+nmap <silent> ]g <Plug>(coc-diagnostic-next-error)
+nmap <silent> <space>dd <Plug>(coc-definition)
+nmap <silent> <space>dt <Plug>(coc-type-definition)
+nmap <silent> <space>di <Plug>(coc-implementation)
+nmap <silent> <space>dr <Plug>(coc-references)
+nnoremap <silent> <space>k :call <SID>show_documentation()<CR>
+nmap <space>rn <Plug>(coc-rename)
+xmap if <Plug>(coc-funcobj-i)
+omap if <Plug>(coc-funcobj-i)
+xmap af <Plug>(coc-funcobj-a)
+omap af <Plug>(coc-funcobj-a)
+xmap ic <Plug>(coc-classobj-i)
+omap ic <Plug>(coc-classobj-i)
+xmap ac <Plug>(coc-classobj-a)
+omap ac <Plug>(coc-classobj-a)
+inoremap <silent><expr> <TAB>
+      \ coc#pum#visible() ? coc#pum#next(1) :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
+highlight CocInfoSign ctermfg=cyan
+highlight CocWarningSign ctermfg=green
+highlight CocErrorSign ctermfg=red
+highlight CocMenuSel ctermfg=white ctermbg=239
+highlight link CocHintHighlight NONE
+highlight link CocInfoHighlight NONE
+highlight link CocWarningHighlight NONE
+highlight link CocErrorHighlight NlNE
+inoremap <silent> <C-j> <C-o>:call coc#float#close_all()<CR>
+nnoremap <silent> <space>j :call coc#float#close_all()<CR>
+
 " MRU
 nnoremap <silent> <Space><Space> :MRUToggle<CR>
-if has('nvim')
-    let g:MRU_File = $HOME . '/.local/share/nvim/.vim_mru_files'
-endif
 
 " pear-tree
 let g:pear_tree_smart_openers=1
@@ -142,3 +145,9 @@ let g:rainbow_active = 1
 
 " cursorword
 let g:cursorword_insert = 0
+
+" nvim
+if has('nvim')
+    autocmd TextYankPost * silent! lua vim.highlight.on_yank ({higroup="IncSearch", timeout=200})
+    let g:MRU_File = $HOME . '/.local/share/nvim/.vim_mru_files'
+endif
