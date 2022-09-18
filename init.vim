@@ -8,33 +8,6 @@ function! GitStatus() abort
     endif
 endfunction
 
-" coc show doc
-function! s:show_documentation()
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  elseif (coc#rpc#ready())
-    call CocActionAsync('doHover')
-  else
-    execute '!' . &keywordprg . " " . expand('<cword>')
-  endif
-endfunction
-
-" coc tab deal with popup
-function! s:check_back_space() abort
-    let col = col('.') - 1
-    return !col || getline('.')[col - 1]  =~ '\s'
-endfunction
-
-function! ScrollMap(is_down) abort
-    if coc#float#has_scroll()
-        return coc#float#scroll(a:is_down)
-    elseif len(popup_list())
-        return a:is_down ? ":call gtrans#Scroll(g:popup_trans_obj, 1)\<CR>" : ":call gtrans#Scroll(g:popup_trans_obj, 0)\<CR>"
-    else
-        return a:is_down ? "\<C-f>" : "\<C-b>"
-    endif
-endfunction
-
 function! s:get_visual_selection() abort range
     let l:column_start = col("'<")
     let l:column_end = col("'>")
@@ -47,14 +20,11 @@ function! s:get_visual_selection() abort range
     return join(l:lines, "\n")
 endfunction
 
-let g:python3_host_prog='/usr/bin/python'
-
 " vista
 let g:vista_executive_for = {
-            \ 'cpp': 'coc',
-            \ 'c': 'coc',
-            \ 'python': 'coc',
-            \ 'javascript': 'coc'
+            \ 'cpp': 'nvim_lsp',
+            \ 'c': 'nvim_lsp',
+            \ 'python': 'nvim_lsp',
             \}
 nnoremap <silent> <Space>u :Vista!!<CR>
 
@@ -89,40 +59,6 @@ highlight GitGutterAdd cterm=none ctermfg=Blue ctermbg=none
 highlight GitGutterChange cterm=none ctermfg=Blue ctermbg=none
 highlight GitGutterDelete cterm=none ctermfg=Blue ctermbg=none
 
-" coc
-set signcolumn=yes
-nmap <silnt> [g <Plug>(coc-diagnostic-prev-error)
-nmap <silent> ]g <Plug>(coc-diagnostic-next-error)
-nmap <silent> <space>dd <Plug>(coc-definition)
-nmap <silent> <space>dt <Plug>(coc-type-definition)
-nmap <silent> <space>di <Plug>(coc-implementation)
-nmap <silent> <space>dr <Plug>(coc-references)
-nnoremap <silent> <space>k :call <SID>show_documentation()<CR>
-nmap <space>rn <Plug>(coc-rename)
-xmap if <Plug>(coc-funcobj-i)
-omap if <Plug>(coc-funcobj-i)
-xmap af <Plug>(coc-funcobj-a)
-omap af <Plug>(coc-funcobj-a)
-xmap ic <Plug>(coc-classobj-i)
-omap ic <Plug>(coc-classobj-i)
-xmap ac <Plug>(coc-classobj-a)
-omap ac <Plug>(coc-classobj-a)
-inoremap <silent><expr> <TAB>
-      \ coc#pum#visible() ? coc#pum#next(1) :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
-highlight CocInfoSign ctermfg=cyan
-highlight CocWarningSign ctermfg=green
-highlight CocErrorSign ctermfg=red
-highlight CocMenuSel ctermfg=white ctermbg=239
-highlight link CocHintHighlight NONE
-highlight link CocInfoHighlight NONE
-highlight link CocWarningHighlight NONE
-highlight link CocErrorHighlight NlNE
-inoremap <silent> <C-j> <C-o>:call coc#float#close_all()<CR>
-nnoremap <silent> <space>j :call coc#float#close_all()<CR>
-
 " MRU
 nnoremap <silent> <Space><Space> :MRUToggle<CR>
 
@@ -147,7 +83,115 @@ let g:rainbow_active = 1
 let g:cursorword_insert = 0
 
 " nvim
-if has('nvim')
-    autocmd TextYankPost * silent! lua vim.highlight.on_yank ({higroup="IncSearch", timeout=200})
-    let g:MRU_File = $HOME . '/.local/share/nvim/.vim_mru_files'
-endif
+let g:python3_host_prog = '/usr/bin/python'
+let g:MRU_File = $HOME . '/.local/share/nvim/.vim_mru_files'
+highlight DiagnosticHint ctermfg=Black
+highlight DiagnosticVirtualTextHint cterm=none ctermfg=none ctermbg=none
+highlight DiagnosticVirtualTextInfo cterm=none ctermfg=none ctermbg=none
+highlight DiagnosticVirtualTextWarn ctermfg=242
+highlight DiagnosticVirtualTextError ctermfg=242
+call sign_define("DiagnosticSignError", #{text: '!', texthl: 'DiagnosticSignError'})
+call sign_define("DiagnosticSignWarn", #{text: '*', texthl: 'DiagnosticSignWarn'})
+call sign_define("DiagnosticSignInfo", #{text: "", texthl: 'DiagnosticSignInfo'})
+call sign_define("DiagnosticSignHint", #{text: "", texthl: 'DiagnosticSignHint'})
+
+lua << EOF
+-- sign hl and marks define
+vim.api.nvim_create_autocmd({"TextYankPost"}, {
+    pattern = {"*"},
+    callback = function() 
+    vim.highlight.on_yank({higroup="IncSearch", timeout=200})
+    end
+    })
+
+local opts = {noremap=true, silent=true}
+vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
+
+-- Use an on_attach function to only map the following keys
+-- after the language server attaches to the current buffer
+local on_attach = function(client, bufnr)
+-- Enable completion triggered by <c-x><c-o>
+-- vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+-- Mappings.
+-- See `:help vim.lsp.*` for documentation on any of the below functions
+local bufopts = {noremap=true, silent=true, buffer=bufnr}
+vim.keymap.set('n', '<space>dc', vim.lsp.buf.declaration, bufopts)
+vim.keymap.set('n', '<space>dd', vim.lsp.buf.definition, bufopts)
+vim.keymap.set('n', '<space>k', vim.lsp.buf.hover, bufopts)
+vim.keymap.set('n', '<space>di', vim.lsp.buf.implementation, bufopts)
+vim.keymap.set('n', '<space>K', vim.lsp.buf.signature_help, bufopts)
+-- vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
+-- vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
+-- vim.keymap.set('n', '<space>wl', function()
+--   print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+-- end, bufopts)
+vim.keymap.set('n', '<space>dt', vim.lsp.buf.type_definition, bufopts)
+vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
+vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
+vim.keymap.set('n', '<space>dr', vim.lsp.buf.references, bufopts)
+vim.keymap.set('n', '<space>f', vim.lsp.buf.formatting, bufopts)
+end
+
+local lsp_flags = {
+    debounce_text_changes=150,
+    }
+
+-- Set up nvim-cmp.
+local cmp = require'cmp'
+
+cmp.setup({
+snippet={},
+window={
+-- completion = cmp.config.window.bordered(),
+-- documentation = cmp.config.window.bordered(),
+},
+  mapping=cmp.mapping.preset.insert({
+  ['<C-b>']=cmp.mapping.scroll_docs(-4),
+  ['<C-f>']=cmp.mapping.scroll_docs(4),
+  ['<Tab>']=cmp.mapping.complete(),
+  ['<Tab>']=cmp.mapping.select_next_item(),
+  ['<S-Tab>']=cmp.mapping.select_prev_item(),
+  ['<C-j>']=cmp.mapping.abort(),
+  }),
+  sources=cmp.config.sources({
+  {name='nvim_lsp'},
+  {name='path'},
+  {name='buffer'},
+  })
+})
+
+-- Set up lspconfig.
+local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+-- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
+require('lspconfig')['pyright'].setup{
+handlers={
+["textDocument/publishDiagnostics"]=vim.lsp.with(
+vim.lsp.diagnostic.on_publish_diagnostics, {
+    underline=false,
+    virtual_text=false,
+    }
+),
+},
+    on_attach=on_attach,
+    flags=lsp_flags,
+    capabilities=capabilities,
+    }
+
+require('lspconfig')['clangd'].setup{
+handlers={
+["textDocument/publishDiagnostics"]=vim.lsp.with(
+vim.lsp.diagnostic.on_publish_diagnostics, {
+    underline=false,
+    virtual_text=true,
+    }
+),
+},
+    on_attach=on_attach,
+    flags=lsp_flags,
+    capabilities=capabilities,
+    }
+EOF

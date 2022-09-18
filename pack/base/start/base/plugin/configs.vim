@@ -31,14 +31,14 @@ endfunction
 function! s:MakeDiff(...) abort
     let l:ft = &filetype
     new
-    execute "edit diff1"
+    execute "edit diff1_" . a:1
     only
     silent! execute "0put " . a:1
     let l:n = 1
     for diff_reg in a:000[1:]
         let l:n += 1
         vnew
-        execute "edit diff" . l:n
+        execute "edit diff" . l:n . "_" . diff_reg
         silent! execute "0put " . diff_reg
     endfor
     windo diffthis
@@ -59,10 +59,11 @@ set number
 set relativenumber
 set linebreak
 if has('nvim')
-    set completeopt=menu,preview
+    set completeopt=menu,menuone,noselect
 else
     set completeopt=menu,popup
 endif
+set signcolumn=yes
 set laststatus=2
 set lazyredraw
 set foldcolumn=0
@@ -179,7 +180,7 @@ inoremap <C-H> <C-O>^
 inoremap <C-L> <C-O>$
 nnoremap <Leader>gr :call Grep2Quickfix()<CR>
 nnoremap <Leader>G :call GrepAll2Quickfix()<CR>
-command -nargs=+ Mkdiff :call s:MakeDiff(<f-args>)
+command -nargs=+ -bang Mkdiff :call s:MakeDiff(<f-args>)
 
 augroup netrw
     autocmd!
