@@ -1,25 +1,3 @@
-" Show git status on status bar
-function! GitStatus() abort
-    let git_status = GitGutterGetHunkSummary()
-    if git_status ==# [0, 0, 0]
-        return printf(gitbranch#name())
-    else
-        return printf('+%s', gitbranch#name())
-    endif
-endfunction
-
-function! s:get_visual_selection() abort range
-    let l:column_start = col("'<")
-    let l:column_end = col("'>")
-    let l:lines = getline(a:firstline, a:lastline)
-    if len(l:lines) ==# 0
-        return ''
-    endif
-    let l:lines[-1] = l:lines[-1][:l:column_end - (&selection ==# 'inclusive' ? 1 : 2)]
-    let l:lines[0] = l:lines[0][l:column_start - 1:]
-    return join(l:lines, "\n")
-endfunction
-
 " vista
 let g:vista_executive_for = {
             \ 'cpp': 'nvim_lsp',
@@ -54,7 +32,7 @@ highlight TabLineFill ctermfg=239 ctermbg=Gray
 
 " gitgutter
 set updatetime=100
-set statusline=%f\ %=%{GitStatus()}\ %L
+set statusline=%f%=%l/%L
 highlight GitGutterAdd cterm=none ctermfg=Blue ctermbg=none
 highlight GitGutterChange cterm=none ctermfg=Blue ctermbg=none
 highlight GitGutterDelete cterm=none ctermfg=Blue ctermbg=none
@@ -82,6 +60,9 @@ let g:rainbow_active = 1
 " cursorword
 let g:cursorword_insert = 0
 
+" session list
+nnoremap <Space>s :Ldsession<CR>
+
 " nvim
 let g:python3_host_prog = '/usr/bin/python'
 let g:MRU_File = $HOME . '/.local/share/nvim/.vim_mru_files'
@@ -100,7 +81,7 @@ lua << EOF
 vim.api.nvim_create_autocmd({"TextYankPost"}, {
     pattern = {"*"},
     callback = function() 
-    vim.highlight.on_yank({higroup="IncSearch", timeout=200})
+        vim.highlight.on_yank({higroup="IncSearch", timeout=200})
     end
     })
 
@@ -141,7 +122,7 @@ local lsp_flags = {
     }
 
 -- Set up nvim-cmp.
-local cmp = require'cmp'
+local cmp = require('cmp')
 
 cmp.setup({
 snippet={},
@@ -158,9 +139,19 @@ window={
   ['<C-j>']=cmp.mapping.abort(),
   }),
   sources=cmp.config.sources({
-  {name='nvim_lsp'},
+  {name='nvim_lsp', keyword_length=2},
+  {name='buffer', keyword_length=2, option={
+      get_bufnrs=function()
+          local cmp_buffer = {}
+          for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+              if vim.fn.buflisted(buf) then
+                  table.insert(cmp_buffer, buf)
+              end
+          end
+          return cmp_buffer
+      end
+  }},
   {name='path'},
-  {name='buffer'},
   })
 })
 

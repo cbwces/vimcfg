@@ -82,15 +82,15 @@ set smartindent
 set timeoutlen=1500
 set ttimeoutlen=50
 set noautoread
+set noruler
+set noshowcmd
 
 set noshowmode "no show status of mode
 set hidden "no mention write after modify current and change to another
 
 augroup viwer
     autocmd!
-    autocmd BufRead * normal zR
-    autocmd BufWrite * mkview
-    autocmd BufRead * silent! loadview
+    autocmd BufRead * silent! '"
 augroup END
 
 
