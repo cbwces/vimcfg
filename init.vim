@@ -6,11 +6,10 @@ let g:vista_executive_for = {
             \}
 nnoremap <silent> <Space>u :Vista!!<CR>
 
-" nerdcomment
-let g:NERDDefaultNesting=0
-nnoremap <silent> <C-n> :call nerdcommenter#Comment(0, "toggle")<CR>
-vnoremap <silent> <C-n> :call nerdcommenter#Comment(0, "toggle")<CR>
-nmap <silent> + <Space>cA
+" lightcmt
+nnoremap <silent> <C-n> :call lightcmt#CommentToggle()<CR>
+vnoremap <silent> <C-n> :call lightcmt#CommentToggle()<CR>
+nnoremap <silent> + :call lightcmt#CommentTail()<CR>
 
 " quickscope
 highlight QuickScopePrimary cterm=none ctermfg=DarkBlue
@@ -24,7 +23,7 @@ nmap S <Plug>(easymotion-overwin-f2)
 
 " buftabline
 let g:buftabline_show=1
-let g:buftabline_numbers=1
+let g:buftabline_numbers=2
 let g:buftabline_indicators=1
 highlight TabLineSel ctermfg=Gray ctermbg=Black
 highlight TabLine ctermfg=Gray ctermbg=239
@@ -39,11 +38,6 @@ highlight GitGutterDelete cterm=none ctermfg=Blue ctermbg=none
 
 " MRU
 nnoremap <silent> <Space><Space> :MRUToggle<CR>
-
-" pear-tree
-let g:pear_tree_smart_openers=1
-let g:pear_tree_smart_closers=1
-let g:pear_tree_smart_backspace=1
 
 " header
 let g:header_auto_add_header=0

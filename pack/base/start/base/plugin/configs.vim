@@ -1,5 +1,31 @@
+" lightweights pair function
+let s:pair_dict = {'"': '"', "'": "'", '(': ')', '[': ']', '{': '}'}
+function s:PairIt(char) abort
+    let l:line_text = getline('.')
+    let l:col_pos = col('.')
+    if index(keys(s:pair_dict), a:char) !=# -1 " if input is a left pair value
+        if l:col_pos > len(l:line_text)
+            return a:char . s:pair_dict[a:char] . "\<Left>"
+        elseif nr2char(strgetchar(l:line_text, col('.')-1)) !=# a:char
+            return a:char . s:pair_dict[a:char] . "\<Left>"
+        else
+            return "\<Right>"
+        endif
+    elseif index(values(s:pair_dict), a:char) !=# -1 " if input is a right pair value
+        if l:col_pos > len(l:line_text)
+            return a:char
+        elseif nr2char(strgetchar(l:line_text, col('.')-1)) ==# a:char
+            return "\<Right>"
+        else
+            return a:char
+        endif
+    else
+        return a:char
+    endif
+endfunction
+
 " Add word under cursor to quickfix and highlight it
-function! Grep2Quickfix() abort
+function Grep2Quickfix() abort
     let l:cword = expand("<cword>")
     cclose
     silent! grep! <cword> %
@@ -8,17 +34,17 @@ function! Grep2Quickfix() abort
     silent call matchadd('Search', l:cword)
 endfunction
 
-function! s:BuffersList() abort
+function s:BuffersList() abort
     let l:opened_buffers = ''
     for l:b in range(1, bufnr('$'))
         if buflisted(l:b)
-            let opened_buffers = opened_buffers . ' ' . bufname(l:b)
+            let l:opened_buffers = l:opened_buffers . ' ' . bufname(l:b)
         endif
     endfor
     return l:opened_buffers
 endfunction
 
-function! GrepAll2Quickfix() abort
+function GrepAll2Quickfix() abort
     let l:opened_buffers = s:BuffersList()
     let l:cword = expand("<cword>")
     cclose
@@ -28,7 +54,7 @@ function! GrepAll2Quickfix() abort
     silent call matchadd('Search', l:cword)
 endfunction
 
-function! s:MakeDiff(...) abort
+function s:MakeDiff(...) abort
     let l:ft = &filetype
     new
     execute "edit diff1_" . a:1
@@ -42,12 +68,25 @@ function! s:MakeDiff(...) abort
         silent! execute "0put " . diff_reg
     endfor
     windo diffthis
-    execute "windo setlocal filetype=" . l:ft
 endfunction
 
 " Let cursor faster return to normal window from netrw
-function! NetrwMapping() abort
+function NetrwMapping() abort
     noremap <buffer> <c-l> <c-w><c-l>
+endfunction
+
+" open buffer with order number
+function OpenBufListed(asked_buf) abort
+    let l:buf_order_number = 1
+    for l:b in range(1, bufnr('$'))
+        if buflisted(l:b)
+            if l:buf_order_number ==# a:asked_buf
+                break
+            endif
+            let l:buf_order_number += 1
+        endif
+    endfor
+    execute "b" . l:b
 endfunction
 
 " Basic comfig
@@ -161,18 +200,27 @@ else
     nnoremap <silent> <Leader>vt :vertical terminal<CR>
 endif
 
-nnoremap <silent> <Leader>1 :b1<CR>
-nnoremap <silent> <Leader>2 :b2<CR>
-nnoremap <silent> <Leader>3 :b3<CR>
-nnoremap <silent> <Leader>4 :b4<CR>
-nnoremap <silent> <Leader>5 :b5<CR>
-nnoremap <silent> <Leader>6 :b6<CR>
-nnoremap <silent> <Leader>7 :b7<CR>
-nnoremap <silent> <Leader>8 :b8<CR>
-nnoremap <silent> <Leader>9 :b9<CR>
-nnoremap <silent> <Leader>0 :b10<CR>
+nnoremap <silent> <Leader>1 :call OpenBufListed(1)<CR>
+nnoremap <silent> <Leader>2 :call OpenBufListed(2)<CR>
+nnoremap <silent> <Leader>3 :call OpenBufListed(3)<CR>
+nnoremap <silent> <Leader>4 :call OpenBufListed(4)<CR>
+nnoremap <silent> <Leader>5 :call OpenBufListed(5)<CR>
+nnoremap <silent> <Leader>6 :call OpenBufListed(6)<CR>
+nnoremap <silent> <Leader>7 :call OpenBufListed(7)<CR>
+nnoremap <silent> <Leader>8 :call OpenBufListed(8)<CR>
+nnoremap <silent> <Leader>9 :call OpenBufListed(9)<CR>
+nnoremap <silent> <Leader>0 :call OpenBufListed(10)<CR>
 nnoremap <silent> <Leader>= :bn<CR>
 nnoremap <silent> <Leader>- :bp<CR>
+
+inoremap <silent><expr> ( <SID>PairIt('(')
+inoremap <silent><expr> [ <SID>PairIt('[')
+inoremap <silent><expr> { <SID>PairIt('{')
+inoremap <silent><expr> ' <SID>PairIt("'")
+inoremap <silent><expr> " <SID>PairIt('"')
+inoremap <silent><expr> ) <SID>PairIt(')')
+inoremap <silent><expr> ] <SID>PairIt(']')
+inoremap <silent><expr> } <SID>PairIt('}')
 
 nnoremap <S-J> jzz
 nnoremap <S-K> kzz

@@ -8,10 +8,11 @@ let s:session_list_win = -1
 let s:namespace = nvim_create_namespace('session_list')
 let s:ext_id_list = []
 if !isdirectory(s:session_dir) | call mkdir(s:session_dir, 'p') | endif
-let s:source_mapping_key = get(g:, 'session_list_source_mapping_key', '<space>p')
-let s:delete_mapping_key = get(g:, 'session_list_delete_map_key', '<space>d')
-let s:rename_mapping_key = get(g:, 'session_list_rename_map_key', '<space>r')
-let s:overwrite_mapping_key = get(g:, 'session_list_overwrite_map_key', '<space>w')
+
+let s:source_mapping_key = get(g:, 'session_list_source_mapping_key', '<cr>')
+let s:delete_mapping_key = get(g:, 'session_list_delete_map_key', '<space>sd')
+let s:rename_mapping_key = get(g:, 'session_list_rename_map_key', '<space>sr')
+let s:overwrite_mapping_key = get(g:, 'session_list_overwrite_map_key', '<space>sw')
 
 function! s:PutVirText(lines) abort
     let s:ext_id_list = []
