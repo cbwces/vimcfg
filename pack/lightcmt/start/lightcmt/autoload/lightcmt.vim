@@ -448,14 +448,14 @@ function lightcmt#CommentToggle() range abort
             let l:comment_mark_right_escape_slash = escape(l:comment_mark_right, '/&')
         endif
 
-        let l:comment_mark_left_length = len(l:comment_mark_left)
-        if trim(getline(a:firstline))[:(l:comment_mark_left_length-1)] !=# l:comment_mark_left
+        let l:comment_mark_left_length = len(trim(l:comment_mark_left))
+        if trim(getline(a:firstline))[:(l:comment_mark_left_length-1)] !=# trim(l:comment_mark_left)
             silent! execute a:firstline . ',' . a:lastline . 's/\s*/&' . l:comment_mark_left_escape_slash . '/'
             if has_key(s:delimiterMap[&filetype], 'right')
                 silent! execute a:firstline . ',' . a:lastline . 's/$/' . l:comment_mark_right_escape_slash . '/'
             endif
         else
-            silent! execute a:firstline . ',' . a:lastline . 's/\(\s*\)' . l:comment_mark_left_escape . '/\1/'
+            silent! execute a:firstline . ',' . a:lastline . 's/\(\s*\)' . trim(l:comment_mark_left_escape) . '\s*/\1/'
             if has_key(s:delimiterMap[&filetype], 'right')
                 silent! execute a:firstline . ',' . a:lastline . 's/' . l:comment_mark_right_escape . '\s*$//'
             endif

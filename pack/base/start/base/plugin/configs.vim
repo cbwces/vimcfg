@@ -6,7 +6,7 @@ function s:PairIt(char) abort
     if index(keys(s:pair_dict), a:char) !=# -1 " if input is a left pair value
         if l:col_pos > len(l:line_text)
             return a:char . s:pair_dict[a:char] . "\<Left>"
-        elseif nr2char(strgetchar(l:line_text, col('.')-1)) !=# a:char
+        elseif matchstr(getline('.'), '\%' . col('.') . 'c.') !=# a:char
             return a:char . s:pair_dict[a:char] . "\<Left>"
         else
             return "\<Right>"
@@ -14,7 +14,7 @@ function s:PairIt(char) abort
     elseif index(values(s:pair_dict), a:char) !=# -1 " if input is a right pair value
         if l:col_pos > len(l:line_text)
             return a:char
-        elseif nr2char(strgetchar(l:line_text, col('.')-1)) ==# a:char
+        elseif matchstr(getline('.'), '\%' . col('.') . 'c.') ==# a:char
             return "\<Right>"
         else
             return a:char
@@ -35,13 +35,8 @@ function Grep2Quickfix() abort
 endfunction
 
 function s:BuffersList() abort
-    let l:opened_buffers = ''
-    for l:b in range(1, bufnr('$'))
-        if buflisted(l:b)
-            let l:opened_buffers = l:opened_buffers . ' ' . bufname(l:b)
-        endif
-    endfor
-    return l:opened_buffers
+	let l:opened_buffers = filter(range(1, bufnr('$')), 'buflisted(v:val)')
+    return join(l:opened_buffers, ' ')
 endfunction
 
 function GrepAll2Quickfix() abort

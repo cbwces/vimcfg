@@ -133,12 +133,12 @@ window={
   ['<C-j>']=cmp.mapping.abort(),
   }),
   sources=cmp.config.sources({
-  {name='nvim_lsp', keyword_length=2},
+  {name='nvim_lsp'},
   {name='buffer', keyword_length=2, option={
       get_bufnrs=function()
           local cmp_buffer = {}
           for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-              if vim.fn.buflisted(buf) then
+              if vim.fn.buflisted(buf) == 1 then
                   table.insert(cmp_buffer, buf)
               end
           end
@@ -152,7 +152,7 @@ window={
 -- Set up lspconfig.
 local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
-require('lspconfig')['pyright'].setup{
+require('lspconfig')['jedi_language_server'].setup{
 handlers={
 ["textDocument/publishDiagnostics"]=vim.lsp.with(
 vim.lsp.diagnostic.on_publish_diagnostics, {
