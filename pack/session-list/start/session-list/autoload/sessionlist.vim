@@ -1,5 +1,5 @@
 highlight default link SessionList Label
-let s:session_dir = get(g:, 'session_save_dir', $HOME . '/.local/share/nvim/session/')
+let s:session_dir = get(g:, 'session_save_dir', stdpath('data') . '/session/')
 let s:session_dir = s:session_dir[len(s:session_dir)-1] ==# '/' ? s:session_dir : s:session_dir . '/'
 let s:session_file = get(g:, 'session_list_record_file', $HOME . '/.local/share/nvim/session/list.json')
 let s:session_window_name = '-SessionList-'

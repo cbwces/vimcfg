@@ -19,3 +19,12 @@ augroup python_abbrev
     autocmd FileType python inoreabbrev <silent> <buffer> ilearn import numpy as np<CR>import torch<CR>import torch.nn as nn<CR>import torch.nn.functional as F<CR><C-R>=<SID>Eatchar('\s')<CR>
     autocmd FileType python inoreabbrev <silent> <buffer> iinit def __init__(self,)<Left>
 augroup end
+
+" c/cpp abbrev
+augroup c_abbrev
+    autocmd!
+    autocmd FileType c inoreabbrev <silent> <buffer> imain int main(int argc, char** argv)<CR>{<CR>return 0;<CR>}<Up><Up><CR><C-R>=<SID>Eatchar('\s')<CR>
+    autocmd FileType cpp inoreabbrev <silent> <buffer> imain int main(int argc, char** argv)<CR>{<CR>return 0;<CR>}<Up><Up><CR><C-R>=<SID>Eatchar('\s')<CR>
+augroup end
+
+

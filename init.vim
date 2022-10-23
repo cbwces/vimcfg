@@ -30,8 +30,6 @@ highlight TabLine ctermfg=Gray ctermbg=239
 highlight TabLineFill ctermfg=239 ctermbg=Gray
 
 " gitgutter
-set updatetime=100
-set statusline=%f%=%l/%L
 highlight GitGutterAdd cterm=none ctermfg=Blue ctermbg=none
 highlight GitGutterChange cterm=none ctermfg=Blue ctermbg=none
 highlight GitGutterDelete cterm=none ctermfg=Blue ctermbg=none
@@ -59,7 +57,7 @@ nnoremap <Space>s :Ldsession<CR>
 
 " nvim
 let g:python3_host_prog = '/usr/bin/python'
-let g:MRU_File = $HOME . '/.local/share/nvim/.vim_mru_files'
+let g:MRU_File = stdpath('data') . '/.vim_mru_files'
 highlight DiagnosticHint ctermfg=Black
 highlight DiagnosticVirtualTextHint cterm=none ctermfg=none ctermbg=none
 highlight DiagnosticVirtualTextInfo cterm=none ctermfg=none ctermbg=none
@@ -71,6 +69,7 @@ call sign_define("DiagnosticSignInfo", #{text: "", texthl: 'DiagnosticSignInfo'}
 call sign_define("DiagnosticSignHint", #{text: "", texthl: 'DiagnosticSignHint'})
 
 lua << EOF
+require('impatient')
 -- sign hl and marks define
 vim.api.nvim_create_autocmd({"TextYankPost"}, {
     pattern = {"*"},
@@ -139,7 +138,15 @@ window={
           local cmp_buffer = {}
           for _, buf in ipairs(vim.api.nvim_list_bufs()) do
               if vim.fn.buflisted(buf) == 1 then
-                  table.insert(cmp_buffer, buf)
+                  local buf_name = vim.api.nvim_buf_get_name(buf)
+                  local buf_file = io.open(buf_name, "r")
+                  if buf_file ~= nil then
+                      local size = buf_file:seek("end")
+                      io.close(buf_file)
+                      if size <= 2097152 then --file less or equal than 2M
+                          table.insert(cmp_buffer, buf)
+                      end
+                  end
               end
           end
           return cmp_buffer

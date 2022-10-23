@@ -4,12 +4,17 @@ function s:PairIt(char) abort
     let l:line_text = getline('.')
     let l:col_pos = col('.')
     if index(keys(s:pair_dict), a:char) !=# -1 " if input is a left pair value
-        if l:col_pos > len(l:line_text)
-            return a:char . s:pair_dict[a:char] . "\<Left>"
-        elseif matchstr(getline('.'), '\%' . col('.') . 'c.') !=# a:char
+        if l:col_pos > len(l:line_text) " end of line
             return a:char . s:pair_dict[a:char] . "\<Left>"
         else
-            return "\<Right>"
+            let l:next_char = matchstr(getline('.'), '\%' . col('.') . 'c.')
+            if l:next_char ==# a:char " right value is curren char
+                return "\<Right>"
+            elseif empty(matchstr(l:next_char, '\k'))
+                return a:char . s:pair_dict[a:char] . "\<Left>"
+            else
+                return a:char
+            endif
         endif
     elseif index(values(s:pair_dict), a:char) !=# -1 " if input is a right pair value
         if l:col_pos > len(l:line_text)
@@ -84,6 +89,32 @@ function OpenBufListed(asked_buf) abort
     execute "b" . l:b
 endfunction
 
+" terminal
+function OpenTerm(is_vrt) abort
+    let l:buf_term = -1
+    for l:b in range(1, bufnr('$'))
+        if buflisted(l:b) && nvim_buf_get_option(l:b, 'buftype') ==# 'terminal'
+            let l:buf_term = l:b
+            break
+        endif
+    endfor
+    if l:buf_term ==# -1
+        if a:is_vrt
+            execute 'vertical split | terminal'
+        else
+            execute 'split | resize 15 | terminal'
+        endif
+        execute 'setlocal nonumber norelativenumber nocursorline nocursorcolumn'
+    else
+        if a:is_vrt
+            execute 'vertical sb ' . l:buf_term
+        else
+            execute 'sb ' . l:buf_term . ' | resize 15'
+        endif
+    endif
+    normal i
+endfunction
+
 " Basic comfig
 filetype plugin indent on
 set cursorline
@@ -115,9 +146,12 @@ set autoindent
 set smartindent
 set timeoutlen=1500
 set ttimeoutlen=50
+set updatetime=100
 set noautoread
 set noruler
 set noshowcmd
+set mouse=
+set statusline=%f%=%l/%L
 
 set noshowmode "no show status of mode
 set hidden "no mention write after modify current and change to another
@@ -144,17 +178,25 @@ highlight StatusLine ctermfg=239 ctermbg=Gray
 highlight StatusLineNC ctermfg=239 ctermbg=Gray
 highlight StatusLineTerm ctermfg=239 ctermbg=Gray
 highlight StatusLineTermNC ctermfg=239 ctermbg=Gray
-highlight VertSplit ctermfg=239 ctermbg=Gray
+highlight VertSplit ctermfg=Gray ctermbg=239
+highlight SignColumn cterm=none ctermbg=none
+highlight LineNr ctermfg=242
+
 highlight Folded ctermfg=gray ctermbg=none
 highlight DiffAdd ctermfg=Green ctermbg=none
 highlight DiffChange ctermfg=none ctermbg=none
 highlight DiffDelete ctermfg=Red ctermbg=none
 highlight DiffText ctermfg=Yellow ctermbg=none
-highlight SignColumn cterm=none ctermbg=none
+
 highlight Search cterm=none ctermfg=Black
 highlight Visual cterm=none ctermbg=LightMagenta ctermfg=Black
-highlight Pmenu ctermfg=Black ctermbg=187
-highlight PmenuSel ctermfg=Gray ctermbg=Black
+
+highlight Pmenu ctermfg=248 ctermbg=233
+highlight PmenuSel ctermfg=233 ctermbg=248
+highlight PmenuSbar ctermfg=233 ctermbg=none
+highlight PmenuThumb ctermfg=248 ctermbg=248
+highlight NormalFloat ctermfg=248 ctermbg=233
+
 highlight CursorColumn ctermbg=238
 highlight CursorLine cterm=none ctermbg=238
 highlight QuickFixLine cterm=none ctermbg=none
@@ -184,8 +226,8 @@ if has('nvim')
     tnoremap <C-L> <C-\><C-N><C-W>l
     tnoremap <C-H> <C-\><C-N><C-W>h
     tnoremap <C-D> <C-\><C-N><C-W>c
-    nnoremap <silent> <Leader>t :split<bar>resize 15<bar>terminal<CR>:setlocal nonumber norelativenumber nocursorline nocursorcolumn<CR>i
-    nnoremap <silent> <Leader>vt :vertical split<bar>terminal<CR>:setlocal nonumber norelativenumber nocursorline nocursorcolumn<CR>i
+    nnoremap <silent> <Leader>t :call OpenTerm(0)<CR>
+    nnoremap <silent> <Leader>vt :call OpenTerm(1)<CR>
 else
     tnoremap <C-J> <C-W>j
     tnoremap <C-K> <C-W>k
