@@ -56,7 +56,7 @@ let g:cursorword_insert = 0
 nnoremap <Space>s :Ldsession<CR>
 
 " nvim
-let g:python3_host_prog = '/usr/bin/python'
+let g:loaded_python3_provider = 0
 let g:MRU_File = stdpath('data') . '/.vim_mru_files'
 highlight DiagnosticHint ctermfg=Black
 highlight DiagnosticVirtualTextHint cterm=none ctermfg=none ctermbg=none
@@ -74,9 +74,9 @@ require('impatient')
 vim.api.nvim_create_autocmd({"TextYankPost"}, {
     pattern = {"*"},
     callback = function() 
-        vim.highlight.on_yank({higroup="IncSearch", timeout=200})
+    vim.highlight.on_yank({higroup="IncSearch", timeout=200})
     end
-    })
+})
 
 local opts = {noremap=true, silent=true}
 vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
@@ -112,78 +112,92 @@ end
 
 local lsp_flags = {
     debounce_text_changes=150,
-    }
+}
 
 -- Set up nvim-cmp.
 local cmp = require('cmp')
 
 cmp.setup({
-snippet={},
-window={
--- completion = cmp.config.window.bordered(),
--- documentation = cmp.config.window.bordered(),
-},
-  mapping=cmp.mapping.preset.insert({
-  ['<C-b>']=cmp.mapping.scroll_docs(-4),
-  ['<C-f>']=cmp.mapping.scroll_docs(4),
-  ['<Tab>']=cmp.mapping.complete(),
-  ['<Tab>']=cmp.mapping.select_next_item(),
-  ['<S-Tab>']=cmp.mapping.select_prev_item(),
-  ['<C-j>']=cmp.mapping.abort(),
-  }),
-  sources=cmp.config.sources({
-  {name='nvim_lsp'},
-  {name='buffer', keyword_length=2, option={
-      get_bufnrs=function()
-          local cmp_buffer = {}
-          for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-              if vim.fn.buflisted(buf) == 1 then
-                  local buf_name = vim.api.nvim_buf_get_name(buf)
-                  local buf_file = io.open(buf_name, "r")
-                  if buf_file ~= nil then
-                      local size = buf_file:seek("end")
-                      io.close(buf_file)
-                      if size <= 2097152 then --file less or equal than 2M
-                          table.insert(cmp_buffer, buf)
-                      end
-                  end
-              end
-          end
-          return cmp_buffer
-      end
-  }},
-  {name='path'},
-  })
+    snippet={},
+    window={
+    -- completion = cmp.config.window.bordered(),
+    -- documentation = cmp.config.window.bordered(),
+    },
+    mapping=cmp.mapping.preset.insert({
+    ['<C-b>']=cmp.mapping.scroll_docs(-4),
+    ['<C-f>']=cmp.mapping.scroll_docs(4),
+    ['<Tab>']=cmp.mapping.complete(),
+    ['<Tab>']=cmp.mapping.select_next_item(),
+    ['<S-Tab>']=cmp.mapping.select_prev_item(),
+    ['<C-j>']=cmp.mapping.abort(),
+    }),
+    sources=cmp.config.sources({
+    {name='nvim_lsp'},
+    {name='buffer', keyword_length=2, option={
+        get_bufnrs=function()
+            local cmp_buffer = {}
+            for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+                if (vim.fn.buflisted(buf) == 1) and (vim.api.nvim_buf_line_count(buf) <= 10000) then
+                    table.insert(cmp_buffer, buf)
+                end
+            end
+            return cmp_buffer
+        end
+    }},
+    {name='path'},
+    })
 })
 
 -- Set up lspconfig.
 local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
 require('lspconfig')['jedi_language_server'].setup{
-handlers={
-["textDocument/publishDiagnostics"]=vim.lsp.with(
-vim.lsp.diagnostic.on_publish_diagnostics, {
-    underline=false,
-    virtual_text=false,
-    }
-),
-},
-    on_attach=on_attach,
-    flags=lsp_flags,
-    capabilities=capabilities,
-    }
+    handlers={
+    ["textDocument/publishDiagnostics"]=vim.lsp.with(
+    vim.lsp.diagnostic.on_publish_diagnostics, {
+        underline=false,
+        virtual_text=false,
+        }
+    ),
+    },
+        on_attach=on_attach,
+        flags=lsp_flags,
+        capabilities=capabilities,
+}
 
 require('lspconfig')['clangd'].setup{
-handlers={
-["textDocument/publishDiagnostics"]=vim.lsp.with(
-vim.lsp.diagnostic.on_publish_diagnostics, {
-    underline=false,
-    virtual_text=true,
-    }
-),
-},
-    on_attach=on_attach,
-    flags=lsp_flags,
-    capabilities=capabilities,
-    }
+    handlers={
+    ["textDocument/publishDiagnostics"]=vim.lsp.with(
+    vim.lsp.diagnostic.on_publish_diagnostics, {
+        underline=false,
+        virtual_text=true,
+        }
+    ),
+    },
+        on_attach=on_attach,
+        flags=lsp_flags,
+        capabilities=capabilities,
+}
+
+require('lspconfig')['sumneko_lua'].setup{
+    settings={
+    Lua = {
+        runtime = {version = 'LuaJIT'},
+        diagnostics = {globals = {'vim'},},
+        workspace = {library = vim.api.nvim_get_runtime_file("", true),},
+        telemetry = {enable = false,}
+        },
+    },
+    handlers={
+    ["textDocument/publishDiagnostics"]=vim.lsp.with(
+    vim.lsp.diagnostic.on_publish_diagnostics, {
+        underline=false,
+        virtual_text=true,
+        }
+    ),
+    },
+        on_attach=on_attach,
+        flags=lsp_flags,
+        capabilities=capabilities,
+}
 EOF
